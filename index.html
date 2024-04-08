@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Microphone Audio Playback</title>
+</head>
+
+<body>
+    <button id="startPlayback">Start Playback</button>
+    <button id="stopPlayback" disabled>Stop Playback</button>
+    <div id="audioContainer"></div>
+
+    <script>
+        let audioContext;
+        let audioInput;
+        let mediaStreamSource;
+        let audioBuffer;
+        let audioBufferSourceNode;
+        let audioDestinationNode;
+
+        const startPlaybackButton = document.getElementById('startPlayback');
+        const stopPlaybackButton = document.getElementById('stopPlayback');
+        const audioContainer = document.getElementById('audioContainer');
+
+        startPlaybackButton.addEventListener('click', startPlayback);
+        stopPlaybackButton.addEventListener('click', stopPlayback);
+
+        async function startPlayback() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaStreamSource = audioContext.createMediaStreamSource(stream);
+                audioDestinationNode = audioContext.destination;
+                mediaStreamSource.connect(audioDestinationNode);
+                startPlaybackButton.disabled = true;
+                stopPlaybackButton.disabled = false;
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+            }
+        }
+
+        function stopPlayback() {
+            if (audioContext) {
+                if (audioBufferSourceNode) {
+                    audioBufferSourceNode.stop();
+                }
+                audioContext.close();
+            }
+            startPlaybackButton.disabled = false;
+            stopPlaybackButton.disabled = true;
+        }
+    </script>
+</body>
+
+</html>
